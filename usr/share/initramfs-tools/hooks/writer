@@ -21,6 +21,8 @@ esac
 copy_exec /usr/bin/vim.basic /bin/rvim
 copy_exec /bin/nano /bin/rnano
 
+cp -p usr/share/initramfs-tools/bin/runeditor ${DESTDIR}/bin
+
 # copy terminfo
 mkdir -p ${DESTDIR}/lib/terminfo/l
 cp -p /lib/terminfo/l/linux ${DESTDIR}/lib/terminfo/l

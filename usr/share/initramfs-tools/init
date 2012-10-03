@@ -90,6 +90,6 @@ unset readonly
 unset resume
 unset resume_offset
 
-/bin/rnano -o /text /text/text.txt
+/bin/runeditor
 /bin/poweroff
 

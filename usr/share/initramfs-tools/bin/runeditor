@@ -1,0 +1,15 @@
+#!/bin/sh
+
+while true ; do
+ /bin/rnano -o /text /text/text.txt
+
+ echo
+ echo Done writing!  Press enter to re-launch text editor,
+ echo or press ctrl-c to shutdown
+ echo
+
+ # get user input, and give a chance for them to hit ctrl-c to break out of
+ # this loop
+ read
+
+done

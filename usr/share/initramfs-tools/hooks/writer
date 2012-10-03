@@ -19,4 +19,7 @@ esac
 # Begin real processing below this line
 
 copy_exec /usr/bin/vim.basic /bin/rvim
+copy_exec /bin/nano /bin/rnano
+
+mkdir ${DESTDIR}/text
 

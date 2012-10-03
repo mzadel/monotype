@@ -91,4 +91,5 @@ unset resume
 unset resume_offset
 
 /bin/sh
+/bin/poweroff
 

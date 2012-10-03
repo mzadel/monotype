@@ -62,15 +62,6 @@ for conf in conf/conf.d/*; do
 done
 . /scripts/functions
 
-if [ -n "${noresume}" ]; then
-	export noresume
-	unset resume
-else
-	resume=${RESUME:-}
-fi
-
-[ -n "${netconsole}" ] && modprobe netconsole netconsole="${netconsole}"
-
 maybe_break top
 
 # Don't do log messages here to avoid confusing usplash

@@ -11,15 +11,11 @@ sudo losetup /dev/loop0 usbimage
 sudo fdisk /dev/loop0
 sudo fdisk -ul /dev/loop0  # to check the offset of the first partition
 sudo losetup --offset 32256 /dev/loop1 /dev/loop0
-sudo mkfs.vfat -F 16 /dev/loop1
+sudo mkfs.vfat -F 16 -n writer /dev/loop1
 sudo mount /dev/loop1 /mnt
 sudo grub-install --no-floppy --root-directory=/mnt /dev/loop0
 
-
-# mkfs.vfat -F 32 -n writer -I /dev/loop1   # if /dev/loop1 has been mapped to the first partition
-
 # then go
-sudo grub-install --no-floppy --root-directory=/mnt /dev/loop0
 cd /mnt/boot/grub
 
 make a grub.cfg with something like this in it:
@@ -30,10 +26,18 @@ make a grub.cfg with something like this in it:
   menuentry "writer!!" {
     # search for the device with the label "writer"
     search --label --no-floppy writer
-    linux (root)/boot/vmlinuz
-    initrd (root)/boot/initrd.gz
+    # root device is implicit here I think
+    linux /boot/vmlinuz
+    initrd /boot/initrd.gz
   }
 
+put the kernel and initrd in /boot
+ sudo cp /boot/vmlinuz-$(uname -r) /mnt/boot
+ sudo cp /home/mark/writingdistro/scratch/initramfs-tools-adaptation/zadelinitrd.gz /boot/initrd.gz
+ sudo sync
 
-
+clean up
+ sudo umount /mnt
+ sudo losetup -d /dev/loop1
+ sudo losetup -d /dev/loop0
 

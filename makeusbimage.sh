@@ -41,3 +41,10 @@ clean up
  sudo losetup -d /dev/loop1
  sudo losetup -d /dev/loop0
 
+
+test with qemu
+## TODO next problem: getting qemu to boot off of this usb key image
+
+// mounting the filesystem on the image w/o having to use losetup:
+sudo mount -o loop,offset=32256,rw /home/mark/writingdistro/scratch/initramfs-tools-adaptation/usbimage /mnt
+

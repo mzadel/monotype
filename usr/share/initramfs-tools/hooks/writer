@@ -23,7 +23,7 @@ copy_exec /bin/nano /bin/rnano
 
 # copy terminfo
 mkdir -p ${DESTDIR}/lib/terminfo/l
-cp /lib/terminfo/l/linux ${DESTDIR}/lib/terminfo/l
+cp -p /lib/terminfo/l/linux ${DESTDIR}/lib/terminfo/l
 
 mkdir ${DESTDIR}/text
 

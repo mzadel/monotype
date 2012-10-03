@@ -5,7 +5,7 @@ export PATH='/usr/bin:/sbin:/bin'
 
 # Defaults
 keep="n"
-CONFDIR="/etc/initramfs-tools"
+CONFDIR="etc/initramfs-tools"
 verbose="n"
 test -e /bin/busybox && BUSYBOXDIR=/bin
 test -e /usr/lib/initramfs-tools/bin/busybox && BUSYBOXDIR=/usr/lib/initramfs-tools/bin
@@ -60,12 +60,12 @@ while true; do
 done
 
 # For dependency ordered mkinitramfs hook scripts.
-. /usr/share/initramfs-tools/scripts/functions
-. /usr/share/initramfs-tools/hook-functions
+. usr/share/initramfs-tools/scripts/functions
+. usr/share/initramfs-tools/hook-functions
 
 . "${CONFDIR}/initramfs.conf"
 EXTRA_CONF=''
-for i in /usr/share/initramfs-tools/conf.d/* ${CONFDIR}/conf.d/*; do
+for i in usr/share/initramfs-tools/conf.d/* ${CONFDIR}/conf.d/*; do
 	[ -e $i ] && EXTRA_CONF="${EXTRA_CONF} $(basename $i \
 		| grep '^[[:alnum:]][[:alnum:]\._-]*$' | grep -v '\.dpkg-.*$')";
 done
@@ -74,13 +74,13 @@ done
 for i in ${EXTRA_CONF}; do
 	if [ -e  ${CONFDIR}/conf.d/${i} ]; then
 		. ${CONFDIR}/conf.d/${i}
-	elif [ -e  /usr/share/initramfs-tools/conf.d/${i} ]; then
-		. /usr/share/initramfs-tools/conf.d/${i}
+	elif [ -e  usr/share/initramfs-tools/conf.d/${i} ]; then
+		. usr/share/initramfs-tools/conf.d/${i}
 	fi
 done
 
 # source package confs
-for i in /usr/share/initramfs-tools/conf-hooks.d/*; do
+for i in usr/share/initramfs-tools/conf-hooks.d/*; do
 	if [ -e "${i}" ]; then
 		. "${i}"
 	fi
@@ -108,7 +108,7 @@ fi
 # Check that we're using a new enough kernel version, first for ourselves,
 # then for each of the hooks, which can have a MINKVER variable defined
 check_minkver ${version}
-check_minkver ${version} /usr/share/initramfs-tools/hooks
+check_minkver ${version} usr/share/initramfs-tools/hooks
 check_minkver ${version} ${CONFDIR}/hooks
 
 case "${version}" in
@@ -204,7 +204,7 @@ if [ -f "${MODULESDIR}/modules.order" ]; then
 fi
 
 # MODULES=list case.  Always honour.
-for x in "${CONFDIR}/modules" /usr/share/initramfs-tools/modules.d/*; do
+for x in "${CONFDIR}/modules" usr/share/initramfs-tools/modules.d/*; do
 	if [ -f "${x}" ]; then
 		add_modules_from_file "${x}"
 	fi
@@ -238,14 +238,14 @@ hidden_dep_add_modules
 # Have to do each file, because cpio --dereference doesn't recurse down
 # symlinks.
 
-cp -p /usr/share/initramfs-tools/init ${DESTDIR}/init
+cp -p usr/share/initramfs-tools/init ${DESTDIR}/init
 
 # add existant boot scripts
-for b in $(cd /usr/share/initramfs-tools/scripts/ && find . \
+for b in $(cd usr/share/initramfs-tools/scripts/ && find . \
 	-regextype posix-extended -regex '.*/[[:alnum:]\._-]+$' -type f); do
 	[ -d "${DESTDIR}/scripts/$(dirname "${b}")" ] \
 		|| mkdir -p "${DESTDIR}/scripts/$(dirname "${b}")"
-	cp -p "/usr/share/initramfs-tools/scripts/${b}" \
+	cp -p "usr/share/initramfs-tools/scripts/${b}" \
 		"${DESTDIR}/scripts/$(dirname "${b}")/"
 done
 for b in $(cd "${CONFDIR}/scripts" && find . \
@@ -260,8 +260,8 @@ cp -p "${CONFDIR}/initramfs.conf" ${DESTDIR}/conf
 for i in ${EXTRA_CONF}; do
 	if [ -e "${CONFDIR}/conf.d/${i}" ]; then
 		copy_exec "${CONFDIR}/conf.d/${i}" /conf/conf.d
-	elif [ -e "/usr/share/initramfs-tools/conf.d/${i}" ]; then
-		copy_exec "/usr/share/initramfs-tools/conf.d/${i}" /conf/conf.d
+	elif [ -e "usr/share/initramfs-tools/conf.d/${i}" ]; then
+		copy_exec "usr/share/initramfs-tools/conf.d/${i}" /conf/conf.d
 	fi
 done
 
@@ -286,7 +286,7 @@ if [ "$DPKG_ARCH" = arm ] || [ "$DPKG_ARCH" = armeb ]; then
 	cp -a /lib/libgcc_s.so.1 "${DESTDIR}/lib/"
 fi
 
-run_scripts /usr/share/initramfs-tools/hooks
+run_scripts usr/share/initramfs-tools/hooks
 run_scripts "${CONFDIR}"/hooks
 
 # cache boot run order

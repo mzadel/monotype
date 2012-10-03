@@ -27,7 +27,7 @@ if [ ! -x /bin/loadkeys ] ||
 	exit 0
 fi
 
-. /usr/share/initramfs-tools/hook-functions
+. usr/share/initramfs-tools/hook-functions
 copy_exec /bin/loadkeys /bin
 
 if [ -e /etc/console-setup/cached.kmap.gz ]; then

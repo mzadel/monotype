@@ -90,6 +90,6 @@ unset readonly
 unset resume
 unset resume_offset
 
-/bin/rvim /text.txt
+/bin/rvim -N -T builtin_ansi -- /text.txt
 /bin/poweroff
 

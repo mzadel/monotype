@@ -62,30 +62,23 @@ for conf in conf/conf.d/*; do
 done
 . /scripts/functions
 
-maybe_break top
-
 # Don't do log messages here to avoid confusing usplash
 run_scripts /scripts/init-top
 
-maybe_break modules
 [ "$quiet" != "y" ] && log_begin_msg "Loading essential drivers"
 load_modules
 [ "$quiet" != "y" ] && log_end_msg
 
-maybe_break premount
 [ "$quiet" != "y" ] && log_begin_msg "Running /scripts/init-premount"
 run_scripts /scripts/init-premount
 [ "$quiet" != "y" ] && log_end_msg
 
-maybe_break mount
 log_begin_msg "Mounting root file system"
 . /scripts/${BOOT}
 parse_numeric ${ROOT}
-maybe_break mountroot
 mountroot
 log_end_msg
 
-maybe_break bottom
 [ "$quiet" != "y" ] && log_begin_msg "Running /scripts/init-bottom"
 run_scripts /scripts/init-bottom
 [ "$quiet" != "y" ] && log_end_msg
@@ -141,8 +134,6 @@ if [ ! -x "${rootmnt}/sbin/init" ]; then
 		panic "No init found. Try passing init= bootarg."
 	fi
 fi
-
-maybe_break init
 
 # don't leak too much of env - some init(8) don't clear it
 # (keep init, rootmnt)

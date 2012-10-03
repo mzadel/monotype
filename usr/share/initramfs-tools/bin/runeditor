@@ -5,11 +5,11 @@ while true ; do
 
  echo
  echo Done writing!  Press enter to re-launch text editor,
- echo or press ctrl-c to shutdown
+ echo or type the word "done" and press enter to reboot.
  echo
 
- # get user input, and give a chance for them to hit ctrl-c to break out of
- # this loop
- read
+ # get user input, to give them a chance to break out of this loop
+ read s
+ if [ -n $s ] ; then exit 0 ; fi
 
 done

@@ -33,7 +33,7 @@ make a grub.cfg with something like this in it:
 
 put the kernel and initrd in /boot
  sudo cp /boot/vmlinuz-$(uname -r) /mnt/boot
- sudo cp /home/mark/writingdistro/scratch/initramfs-tools-adaptation/zadelinitrd.gz /boot/initrd.gz
+ sudo cp /home/mark/writingdistro/scratch/initramfs-tools-adaptation/zadelinitrd.gz /mnt/boot/initrd.gz
  sudo sync
 
 clean up

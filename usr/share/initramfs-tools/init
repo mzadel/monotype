@@ -62,7 +62,6 @@ for conf in conf/conf.d/*; do
 done
 . /scripts/functions
 
-# Don't do log messages here to avoid confusing usplash
 run_scripts /scripts/init-top
 
 load_modules

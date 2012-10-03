@@ -90,6 +90,5 @@ unset readonly
 unset resume
 unset resume_offset
 
-# Chain to real filesystem
-exec run-init ${rootmnt} ${init} "$@" <${rootmnt}/dev/console >${rootmnt}/dev/console
-panic "Could not execute run-init."
+/bin/sh
+

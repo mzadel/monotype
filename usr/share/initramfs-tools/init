@@ -65,13 +65,9 @@ done
 # Don't do log messages here to avoid confusing usplash
 run_scripts /scripts/init-top
 
-[ "$quiet" != "y" ] && log_begin_msg "Loading essential drivers"
 load_modules
-[ "$quiet" != "y" ] && log_end_msg
 
-[ "$quiet" != "y" ] && log_begin_msg "Running /scripts/init-premount"
 run_scripts /scripts/init-premount
-[ "$quiet" != "y" ] && log_end_msg
 
 log_begin_msg "Mounting root file system"
 . /scripts/${BOOT}
@@ -79,9 +75,7 @@ parse_numeric ${ROOT}
 mountroot
 log_end_msg
 
-[ "$quiet" != "y" ] && log_begin_msg "Running /scripts/init-bottom"
 run_scripts /scripts/init-bottom
-[ "$quiet" != "y" ] && log_end_msg
 
 # Move virtual filesystems over to the real filesystem
 mount -n -o move /sys ${rootmnt}/sys

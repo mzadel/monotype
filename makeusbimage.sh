@@ -69,7 +69,7 @@ sudo losetup /dev/loop0 usbimage
 sudo losetup --offset 1048576 /dev/loop1 /dev/loop0
 sudo mkfs.vfat -F 16 /dev/loop1
 sudo syslinux /dev/loop1  # onto the *first partition*
-sudo dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/mbr.bin of=/dev/loop0
+sudo dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/mbr.bin of=/dev/loop0  # bootstrap code for syslinux (command from wiki page)
 sudo losetup -d /dev/loop{5,4,3,2,1,0}   # clear everything
 
 # setup a syslinux.cfg file on the device

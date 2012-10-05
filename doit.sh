@@ -24,9 +24,11 @@ sudo mount /dev/loop1 /mnt
 #sudo grub-install --no-floppy --root-directory=/mnt /dev/loop0   # loop0 is the "disk", and loop1 is the first partition, mounted on /mnt
 
 echo installing syslinux
-sudo syslinux /dev/loop1  # onto the *first partition*
+sudo mkdir /mnt/syslinux
+sudo syslinux -i -d syslinux /dev/loop1  # onto the *first partition*
 sudo dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/mbr.bin of=/dev/loop0  # bootstrap code for syslinux
-sudo cp /boot/vmlinuz-2.6.32-5-amd64 /mnt/vmlinuz
-sudo cp zadelinitrd.gz /mnt/initrd.gz
-sudo cp syslinux.cfg /mnt
+sudo cp /boot/vmlinuz-2.6.32-5-amd64 /mnt/syslinux/vmlinuz
+sudo cp zadelinitrd.gz /mnt/syslinux/initrd.gz
+sudo cp syslinux.cfg /mnt/syslinux
+sudo sync
 

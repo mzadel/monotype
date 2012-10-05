@@ -18,6 +18,14 @@ esac
 . usr/share/initramfs-tools/hook-functions
 # Begin real processing below this line
 
+for x in ehci-hcd ohci-hcd uhci-hcd usbhid xhci hid-apple \
+hid-cherry hid-logitech hid-microsoft \
+vfat; do
+	manual_add_modules "${x}"
+done
+
+copy_modules_dir kernel/drivers/usb/storage
+
 copy_exec /usr/bin/vim.basic /bin/rvim
 copy_exec /bin/nano /bin/rnano
 

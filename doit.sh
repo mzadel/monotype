@@ -27,7 +27,7 @@ echo installing syslinux
 sudo mkdir /mnt/syslinux
 sudo syslinux -i -d syslinux /dev/loop1  # onto the *first partition*
 sudo dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/mbr.bin of=/dev/loop0  # bootstrap code for syslinux
-sudo cp /boot/vmlinuz-2.6.32-5-amd64 /mnt/syslinux/vmlinuz
+sudo cp /boot/vmlinuz-$(uname -r) /mnt/syslinux/vmlinuz
 sudo cp zadelinitrd.gz /mnt/syslinux/initrd.gz
 sudo cp syslinux.cfg /mnt/syslinux
 sudo sync

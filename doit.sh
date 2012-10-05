@@ -5,7 +5,7 @@ if mount | grep -q ' \/mnt ' ; then echo something still mounted, bailing ; exit
 sudo losetup -d /dev/loop{5,4,3,2,1,0}   # clear everything
 
 echo making image
-dd if=/dev/zero of=usbimage bs=1M count=50
+dd if=/dev/zero of=usbimage bs=1M count=20
 
 echo partitioning
 sudo losetup /dev/loop0 usbimage

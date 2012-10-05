@@ -10,7 +10,7 @@ dd if=/dev/zero of=usbimage bs=1M count=50
 echo partitioning
 sudo losetup /dev/loop0 usbimage
 sudo parted /dev/loop0 mklabel msdos
-sudo parted /dev/loop0 mkpart primary fat16 1 40
+sudo parted /dev/loop0 mkpart primary fat16 1 100%
 sudo parted /dev/loop0 set 1 boot on
 
 echo making filesystem

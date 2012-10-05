@@ -32,3 +32,9 @@ sudo cp zadelinitrd.gz /mnt/syslinux/initrd.gz
 sudo cp syslinux.cfg /mnt/syslinux
 sudo sync
 
+echo cleaning up
+sudo umount /mnt
+sudo losetup -d /dev/loop{1,0}
+
+echo done
+

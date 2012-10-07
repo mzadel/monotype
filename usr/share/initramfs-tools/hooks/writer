@@ -55,5 +55,3 @@ cp -p usr/share/initramfs-tools/bin/runeditor ${DESTDIR}/bin
 mkdir -p ${DESTDIR}/lib/terminfo/l
 cp -p /lib/terminfo/l/linux ${DESTDIR}/lib/terminfo/l
 
-mkdir ${DESTDIR}/text
-

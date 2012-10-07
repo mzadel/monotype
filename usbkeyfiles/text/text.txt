@@ -1,0 +1,11 @@
+
+Welcome to Typewriter Linux!
+
+Any changes you save here will be available on the usb key under the file
+text/text.txt.
+
+F1       Help
+Ctrl-o   Save
+Ctrl-x   Quit
+Alt-x    Show/hide the menu bar
+

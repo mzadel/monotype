@@ -44,9 +44,11 @@ force_load vfat
 manual_add_modules nls_cp437
 manual_add_modules nls_utf8
 
+# copy over binaries we want to include
 copy_exec /usr/bin/vim.basic /bin/rvim
 copy_exec /bin/nano /bin/rnano
 
+# copy over custom scripts we use
 cp -p usr/share/initramfs-tools/bin/runeditor ${DESTDIR}/bin
 
 # copy terminfo

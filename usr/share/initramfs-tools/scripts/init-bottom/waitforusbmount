@@ -1,0 +1,25 @@
+#!/bin/sh -e
+
+PREREQS=""
+
+prereqs() { echo "$PREREQS"; }
+
+case "$1" in
+    prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+# wait for the usb key to be mounted before proceeding
+
+echo waiting for usb key to be mounted...
+
+while [ ! -e /dev/disk/by-label/writer ] ; do
+ echo -n .
+ sleep 1
+done
+
+echo usb key mounted!
+
+

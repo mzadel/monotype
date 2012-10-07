@@ -1,7 +1,7 @@
 #!/bin/sh
 
 while true ; do
- /bin/rnano -o /mnt/text /mnt/text/text.txt
+ /bin/rnano -x -o /mnt/text /mnt/text/text.txt
 
  echo Done writing!
  echo Type the letter r and press enter to reboot your computer.

@@ -91,5 +91,4 @@ unset resume
 unset resume_offset
 
 /bin/runeditor
-/bin/reboot
 

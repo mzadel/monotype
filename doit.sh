@@ -4,7 +4,7 @@ sudo umount /mnt
 if mount | grep -q ' \/mnt ' ; then echo something still mounted, bailing ; exit 1 ; fi
 
 echo making initrd
-sudo ./mkinitramfs -o zadelinitrd.gz $(uname -r)
+sudo ./mkinitramfs -o initrd.gz $(uname -r)
 
 echo making image
 dd if=/dev/zero of=usbimage bs=1M count=20
@@ -32,7 +32,7 @@ sudo mkdir /mnt/syslinux
 sudo syslinux -i -d syslinux $FATFILESYSTEMLOOPBACK  # onto the *first partition*
 sudo dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/mbr.bin of=$USBDEVICELOOPBACK  # bootstrap code for syslinux
 sudo cp /boot/vmlinuz-$(uname -r) /mnt/syslinux/vmlinuz
-sudo cp zadelinitrd.gz /mnt/syslinux/initrd.gz
+sudo cp initrd.gz /mnt/syslinux/initrd.gz
 sudo cp syslinux.cfg /mnt/syslinux
 sudo mkdir /mnt/text
 sudo sync

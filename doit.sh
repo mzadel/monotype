@@ -16,7 +16,7 @@ sudo parted $USBDEVICELOOPBACK set 1 boot on
 echo making filesystem
 FATFILESYSTEMLOOPBACK=$(sudo losetup -f)
 sudo losetup --offset 1048576 $FATFILESYSTEMLOOPBACK $USBDEVICELOOPBACK
-sudo mkfs.vfat -F 16 $FATFILESYSTEMLOOPBACK
+sudo mkfs.vfat -F 16 -n writer $FATFILESYSTEMLOOPBACK
 
 echo mounting on /mnt
 sudo mount $FATFILESYSTEMLOOPBACK /mnt

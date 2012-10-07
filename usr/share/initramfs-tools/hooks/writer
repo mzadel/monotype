@@ -18,13 +18,31 @@ esac
 . usr/share/initramfs-tools/hook-functions
 # Begin real processing below this line
 
+# copy over all the modules we could need
+# these are adapted from auto_add_modules() in usr/share/initramfs-tools/hook-functions
+# basically choosing base scsi mmc usb_storage
+#
+# a few comments:
+#  there's a bit of code duplication from auto_add_modules() (for the base case)
+#  not sure if auto_add_modules is intended to be used in hook scripts
+#  95% of these modules are probably never needed by anyone who'd ever use
+#   this, so it'll need to be optimised later
+
 for x in ehci-hcd ohci-hcd uhci-hcd usbhid xhci hid-apple \
 hid-cherry hid-logitech hid-microsoft \
-vfat; do
+af_packet atkbd i8042 virtio_pci; do
 	manual_add_modules "${x}"
 done
 
-copy_modules_dir kernel/drivers/usb/storage
+auto_add_modules scsi
+auto_add_modules mmc
+auto_add_modules usb_storage
+
+# copy modules needed to mount the FAT filesystem on the usb key
+# force_load ensures that the module will be loaded immediately
+force_load vfat
+manual_add_modules nls_cp437
+manual_add_modules nls_utf8
 
 copy_exec /usr/bin/vim.basic /bin/rvim
 copy_exec /bin/nano /bin/rnano

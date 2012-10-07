@@ -3,6 +3,9 @@
 sudo umount /mnt
 if mount | grep -q ' \/mnt ' ; then echo something still mounted, bailing ; exit 1 ; fi
 
+echo making initrd
+sudo ./mkinitramfs -o zadelinitrd.gz $(uname -r)
+
 echo making image
 dd if=/dev/zero of=usbimage bs=1M count=20
 

@@ -31,6 +31,7 @@ sudo dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/mbr.bin of=$USBDEVICELO
 sudo cp /boot/vmlinuz-$(uname -r) /mnt/syslinux/vmlinuz
 sudo cp zadelinitrd.gz /mnt/syslinux/initrd.gz
 sudo cp syslinux.cfg /mnt/syslinux
+sudo mkdir /mnt/text
 sudo sync
 
 echo cleaning up

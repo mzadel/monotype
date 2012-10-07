@@ -5,11 +5,13 @@ while true ; do
 
  echo Done writing!
  echo Type the letter r and press enter to reboot your computer.
+ echo Type the letter t and press enter to turn off your computer.
  echo Type the letter w and press enter to go back to the text editor to keep
  echo writing.
 
  # get user input, to give them a chance to break out of this loop
- read -p "(r)eboot, or keep (w)riting? " RESPONSE
- if [ "$RESPONSE" == r -o  "$RESPONSE" == R ] ; then exit 0 ; fi
+ read -p "(r)eboot, (t)urn off the computer, or keep (w)riting? " RESPONSE
+ if [ "$RESPONSE" == r -o  "$RESPONSE" == R ] ; then /bin/reboot ; fi
+ if [ "$RESPONSE" == t -o  "$RESPONSE" == T ] ; then /bin/poweroff ; fi
 
 done

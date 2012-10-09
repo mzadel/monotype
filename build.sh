@@ -7,11 +7,11 @@ echo making initrd
 sudo ./mkinitramfs -o initrd.gz $(uname -r)
 
 echo making image
-dd if=/dev/zero of=usbimage bs=1M count=20
+dd if=/dev/zero of=monotype.img bs=1M count=20
 
 echo partitioning
 USBDEVICELOOPBACK=$(sudo losetup -f)
-sudo losetup $USBDEVICELOOPBACK usbimage
+sudo losetup $USBDEVICELOOPBACK monotype.img
 sudo parted $USBDEVICELOOPBACK mklabel msdos
 sudo parted $USBDEVICELOOPBACK mkpart primary fat16 1 100%
 sudo parted $USBDEVICELOOPBACK set 1 boot on

@@ -25,7 +25,7 @@ echo mounting on /mnt
 sudo mount $FATFILESYSTEMLOOPBACK /mnt
 
 echo generating buildinfo file
-MONOTYPEVERSION=monotype-$(date +%Y%m%d)-git$(git rev-parse --short HEAD)
+MONOTYPEVERSION=monotype-$(date +%Y%m%d)-git-$(git rev-parse --short HEAD)
 echo $MONOTYPEVERSION > buildinfo.txt
 echo built "$(date)" >> buildinfo.txt
 uname -srv >> buildinfo.txt

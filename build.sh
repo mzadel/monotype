@@ -24,9 +24,6 @@ sudo mkfs.vfat -F 16 -n writer $FATFILESYSTEMLOOPBACK
 echo mounting on /mnt
 sudo mount $FATFILESYSTEMLOOPBACK /mnt
 
-#echo installing grub
-#sudo grub-install --no-floppy --root-directory=/mnt $USBDEVICELOOPBACK   # loop0 is the "disk", and loop1 is the first partition, mounted on /mnt
-
 echo installing syslinux
 sudo mkdir /mnt/syslinux
 sudo syslinux -i -d syslinux $FATFILESYSTEMLOOPBACK  # onto the *first partition*

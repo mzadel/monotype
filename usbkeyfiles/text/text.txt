@@ -1,5 +1,5 @@
 
-Welcome to Typewriter Linux!
+Welcome to Monotype!
 
 Any changes you save here will be available on the usb key under the file
 text/text.txt.

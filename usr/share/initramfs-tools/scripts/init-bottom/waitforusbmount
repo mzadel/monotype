@@ -15,7 +15,7 @@ esac
 
 echo waiting for usb key to be mounted...
 
-while [ ! -e /dev/disk/by-label/writer ] ; do
+while [ ! -e /dev/disk/by-label/monotype ] ; do
  echo -n .
  sleep 1
 done

@@ -1,7 +1,0 @@
-
-required debian packages:
- apt-get install parted
- apt-get install dosfstools
- apt-get install mtools
- apt-get install syslinux
-

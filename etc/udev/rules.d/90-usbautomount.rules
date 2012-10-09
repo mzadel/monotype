@@ -1,8 +1,8 @@
 
-# automount filesystems labeled "writer".  This is the label that we use for
+# automount filesystems labeled "monotype".  This is the label that we use for
 # the usb key's filesystem, so it should correspond more-or-less uniquely to
 # the usb key we want to mount.
 
-ENV{ID_FS_LABEL}=="writer", ACTION=="add", SUBSYSTEMS=="usb", RUN+="/bin/busybox mount -o sync /dev/%k /mnt"
-ENV{ID_FS_LABEL}=="writer", ACTION=="remove", SUBSYSTEMS=="usb", RUN+="/bin/busybox umount /mnt"
+ENV{ID_FS_LABEL}=="monotype", ACTION=="add", SUBSYSTEMS=="usb", RUN+="/bin/busybox mount -o sync /dev/%k /mnt"
+ENV{ID_FS_LABEL}=="monotype", ACTION=="remove", SUBSYSTEMS=="usb", RUN+="/bin/busybox umount /mnt"
 

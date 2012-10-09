@@ -24,6 +24,13 @@ sudo mkfs.vfat -F 16 -n writer $FATFILESYSTEMLOOPBACK
 echo mounting on /mnt
 sudo mount $FATFILESYSTEMLOOPBACK /mnt
 
+echo generating buildinfo file
+MONOTYPEVERSION=monotype-$(date +%Y%m%d)-git$(git rev-parse --short HEAD)
+echo $MONOTYPEVERSION > buildinfo.txt
+echo built "$(date)" >> buildinfo.txt
+uname -srv >> buildinfo.txt
+echo debian version $(cat /etc/debian_version) >> buildinfo.txt
+
 echo installing syslinux
 sudo mkdir /mnt/syslinux
 sudo syslinux -i -d syslinux $FATFILESYSTEMLOOPBACK  # onto the *first partition*

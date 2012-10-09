@@ -38,6 +38,7 @@ sudo dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/mbr.bin of=$USBDEVICELO
 sudo cp /boot/vmlinuz-$(uname -r) /mnt/syslinux/vmlinuz
 sudo cp initrd.gz /mnt/syslinux/initrd.gz
 sudo cp -r usbkeyfiles/* /mnt
+sudo cp buildinfo.txt /mnt
 sudo sync
 
 echo cleaning up

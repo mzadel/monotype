@@ -136,7 +136,7 @@ to the reader.
 
 ## License and Disclaimer
 
-Monotype is provided under the terms of the GNU GPL.  The source files that
+Monotype is provided under the terms of the GNU GPL v3.  The source files that
 have been copied from Debian are subject to their respective licenses.
 
 Please note: this is alpha software and I cannot be held responsible for any

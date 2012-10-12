@@ -128,6 +128,7 @@ to the reader.
 - Text editors that aim to block out visual distractions:
     - [WriteRoom](http://www.hogbaysoftware.com/products/writeroom) (Mac, paid)
     - [PyRoom](http://pyroom.org/) (GPL, cross-platform)
+    - [TextRoom](http://code.google.com/p/textroom/) (GPL, cross-platform)
     - [Dark Room](http://they.misled.us/dark-room) (Windows, free)
     - [Write Monkey](http://writemonkey.com/index.php) (Windows, free)
     - [Typewriter](http://www.lifehackingmovie.com/2009/05/18/typewriter-minimal-text-editor-freeware/)  (Java, cross-platform, free)

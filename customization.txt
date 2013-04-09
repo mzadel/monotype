@@ -1,0 +1,5 @@
+
+To choose which text editor to use (nano or vim), edit the file
+  usr/share/initramfs-tools/bin/runeditor
+and uncomment the line that runs your preferred editor.
+

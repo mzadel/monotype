@@ -1,7 +1,10 @@
 #!/bin/sh
 
 while true ; do
+ # to select which editor you would like to use, leave *one* of the following
+ # lines uncommented
  /bin/rnano -x -o /mnt/text /mnt/text/text.txt
+ #/bin/rvim /mnt/text/text.txt
 
  echo Done writing!
  echo Type the letter r and press enter to reboot your computer.

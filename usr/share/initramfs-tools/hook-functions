@@ -10,10 +10,11 @@ catenate_cpiogz() {
 	cat "${1}" >>"${__TMPCPIOGZ}"
 }
 
+# force_load module [args...]
 force_load()
 {
-		manual_add_modules ${@}
-		echo "${@}" >>"${DESTDIR}/conf/modules"
+	manual_add_modules "$1"
+	echo "${@}" >>"${DESTDIR}/conf/modules"
 }
 
 # Takes a file containing a list of modules to be added as an
@@ -42,17 +43,24 @@ add_modules_from_file()
 # Add dependent modules + eventual firmware
 manual_add_modules()
 {
-	local kmod firmware
+	local prefix kmod options firmware
 
-	for kmod in $(modprobe --set-version="${version}" --ignore-install \
-	--quiet --show-depends "${1}" | awk '/^insmod/ { print $2 }'); do
+	if [ $# -eq 0 ]; then
+		return
+	fi
+
+	modprobe --all --set-version="${version}" --ignore-install --quiet --show-depends "$@" |
+	while read prefix kmod options ; do
+		if [ "${prefix}" != "insmod" ]; then
+			continue
+		fi
+
 		# Prune duplicates
 		if [ -e "${DESTDIR}/${kmod}" ]; then
 			continue
 		fi
 
-		mkdir -p "${DESTDIR}/$(dirname "${kmod}")"
-		ln -s "${kmod}" "${DESTDIR}/$(dirname "${kmod}")"
+		install -Dpm 644 "$kmod" "${DESTDIR}/$kmod"
 		if [ "${verbose}" = "y" ]; then
 			echo "Adding module ${kmod}"
 		fi
@@ -74,18 +82,12 @@ manual_add_modules()
 					continue
 				fi
 
-				if grep -q "^$(basename "${kmod}" .ko)[[:space:]]" \
-				/proc/modules \
-				|| grep -q "^$(basename "${kmod}" .ko)" \
-				"${CONFDIR}/modules"; then
+				kmod_modname="${kmod##*/}"
+				kmod_modname="${kmod_modname%.ko}"
+				if grep -q "^$kmod_modname\\>" /proc/modules "${CONFDIR}/modules"; then
 					echo "W: Possible missing firmware /lib/firmware/${firmware} for module $(basename ${kmod} .ko)" >&2
 				fi
 				continue
-			fi
-
-			if [ ! -e "${DESTDIR}/lib/udev/firmware.agent" ] \
-			&& [ -e "/lib/udev/firmware.agent" ]; then
-				copy_exec /lib/udev/firmware.agent
 			fi
 
 			if [ -e "/lib/firmware/${version}/${firmware}" ]; then
@@ -123,10 +125,10 @@ copy_exec() {
 	fi
 
 	[ "${verbose}" = "y" ] && echo "Adding binary ${src}"
-	ln -s "${src}" "${DESTDIR}/${target}"
+	cp -pL "${src}" "${DESTDIR}/${target}"
 
 	# Copy the dependant libraries
-	for x in $(ldd ${src} 2>/dev/null | sed -e '
+	for x in $(ldd "${src}" 2>/dev/null | sed -e '
 		/\//!d;
 		/linux-gate/d;
 		/=>/ {s/.*=>[[:blank:]]*\([^[:blank:]]*\).*/\1/};
@@ -135,7 +137,8 @@ copy_exec() {
 		# Try to use non-optimised libraries where possible.
 		# We assume that all HWCAP libraries will be in tls,
 		# sse2, vfp or neon.
-		nonoptlib=$(echo "${x}" | sed -e 's#/lib/\(tls\|i686\|sse2\|neon\|vfp\).*/\(lib.*\)#/lib/\2#')
+		nonoptlib=$(echo "${x}" | sed -e 's#/lib/\([^/]*/\)\?\(tls\|i686\|sse2\|neon\|vfp\).*/\(lib.*\)#/lib/\1\3#')
+		nonoptlib=$(echo "${nonoptlib}" | sed -e 's#-linux-gnu/\(tls\|i686\|sse2\|neon\|vfp\).*/\(lib.*\)#-linux-gnu/\2#')
 
 		if [ -e "${nonoptlib}" ]; then
 			x="${nonoptlib}"
@@ -147,7 +150,7 @@ copy_exec() {
 		# FIXME inst_lib
 		mkdir -p "${DESTDIR}/${dirname}"
 		if [ ! -e "${DESTDIR}/${dirname}/${libname}" ]; then
-			ln -s "${x}" "${DESTDIR}/${dirname}"
+			cp -pL "${x}" "${DESTDIR}/${dirname}"
 			[ "${verbose}" = "y" ] && echo "Adding library ${x}" || true
 		fi
 	done
@@ -157,6 +160,7 @@ copy_exec() {
 copy_modules_dir()
 {
 	local kmod exclude
+	local modules=
 	local dir="$1"
 	shift
 
@@ -173,9 +177,10 @@ copy_modules_dir()
 		exclude="${exclude:-} -name $1 -prune -o "
 		shift
 	done
-	for kmod in $(find "${MODULESDIR}/${dir}" ${exclude:-} -name '*.ko' -print); do
-		manual_add_modules $(basename ${kmod} .ko)
+	for kmod in $(find "${MODULESDIR}/${dir}" ${exclude:-} -name '*.ko' -printf '%f\n'); do
+		modules="$modules ${kmod%.ko}"
 	done
+	manual_add_modules $modules
 }
 
 # walk /sys for relevant modules
@@ -216,7 +221,8 @@ sys_walk_modalias()
 # find and only copy root relevant modules
 dep_add_modules()
 {
-	local block minor root FSTYPE root_dev_path x
+	local block minor root FSTYPE root_dev_path
+	local modules=
 
 	# require mounted sysfs
 	if [ ! -d /sys/devices/ ]; then
@@ -225,17 +231,25 @@ dep_add_modules()
 	fi
 
 	# findout root block device + fstype
-	eval "$(mount | awk '/\/dev\// {if ($3 == "/") {print "root=" $1 "\nFSTYPE=" $5; exit}}')"
+	eval "$( mount | while read dev foo mp foo fs opts rest ; do \
+        	[ "$mp" = "/" ] && [ "$fs" != "rootfs" ] \
+		&& printf "root=$dev\nFSTYPE=$fs" \
+		&& break; done)"
 
 	# On failure fallback to /proc/mounts if readable
 	if [ -z "$root" ] && [ -r /proc/mounts ]; then
-		eval "$(awk '!/^rootfs / {if ($2 == "/") {print "root=" $1 "\nFSTYPE=" $3; exit}}' /proc/mounts)"
+		eval "$(while read dev mp fs opts rest ; do \
+			[ "$mp" = "/" ] && [ "$fs" != "rootfs" ] \
+			&& printf "root=$dev\nFSTYPE=$fs"\
+			&& break; done < /proc/mounts)"
 	fi
 
 	# recheck root device
 	if [ -z "$root" ]; then
 		echo "mkinitramfs: failed to determine root device" >&2
-		echo "mkinitramfs: workaround is MODULES=most" >&2
+		echo "mkinitramfs: workaround is MODULES=most, check:" >&2
+		echo "grep -r MODULES /etc/initramfs-tools/" >&2
+		echo "" >&2
 		echo "Error please report bug on initramfs-tools" >&2
 		echo "Include the output of 'mount' and 'cat /proc/mounts'" >&2
 		exit 1
@@ -245,10 +259,6 @@ dep_add_modules()
 	# most of the commands below only work with block devices.
 	if [ "${FSTYPE}" = "ubifs" ]; then
 		manual_add_modules "${FSTYPE}"
-		# add some modules required by ubifs on which it doesn's depend
-		manual_add_modules deflate
-		manual_add_modules zlib
-		manual_add_modules lzo
 		return
 	fi
 
@@ -272,7 +282,7 @@ dep_add_modules()
 	fi
 
 	# Add rootfs
-	manual_add_modules "${FSTYPE}"
+	modules="$modules ${FSTYPE}"
 
 	# lvm or luks root
 	if [ "${root#/dev/mapper/}" != "${root}" ] \
@@ -365,24 +375,21 @@ dep_add_modules()
 	sys_walk_mod_add ${root_dev_path}
 
 	# catch old-style IDE
-	if [ -d "${DESTDIR}/lib/modules/${version}/kernel/drivers/ide" ]; then
+	if [ -e /sys/bus/ide/devices/ ]; then
 		sys_walk_modalias ${root_dev_path}
-		manual_add_modules ide-gd_mod
-		# FIXME: remove post Squeeze
-		manual_add_modules ide-disk
-		manual_add_modules ide-cd
+		modules="$modules ide-gd_mod ide-cd"
 	fi
 
-	if [ -d "${DESTDIR}/lib/modules/${version}/kernel/drivers/scsi" ]; then
-		manual_add_modules sd_mod
+	if [ -e /sys/bus/scsi/devices/ ]; then
+		modules="$modules sd_mod"
 	fi
 
 	if [ -e /sys/bus/mmc/devices/ ]; then
-		manual_add_modules mmc_block
+		modules="$modules mmc_block"
 	fi
 
 	if [ -e /sys/bus/virtio ] ; then
-		manual_add_modules virtio_pci
+		modules="$modules virtio_pci"
 	fi
 
 	if [ -e /sys/bus/i2o/devices/ ]; then
@@ -391,97 +398,82 @@ dep_add_modules()
 	fi
 
 	if [ -e /sys/bus/ps3_system_bus/ ]; then
-		for x in ps3disk ps3rom ps3-gelic ps3_sys_manager; do
-			manual_add_modules "${x}"
-		done
+		modules="$modules ps3disk ps3rom ps3-gelic ps3_sys_manager"
 	fi
 
 	if [ -e /sys/bus/vio/ ]; then
-		for x in sunvnet sunvdc; do
-			manual_add_modules "${x}"
-		done
+		modules="$modules sunvnet sunvdc"
 	fi
+
+	manual_add_modules $modules
 }
 
 
 # The modules "most" classes added per default to the initramfs
 auto_add_modules()
 {
-	case "${1:-}" in
-	base)
-		for x in ehci-hcd ohci-hcd uhci-hcd usbhid xhci hid-apple \
-		hid-cherry hid-logitech hid-microsoft \
-		btrfs ext2 ext3 ext4 ext4dev isofs jfs nfs reiserfs udf xfs \
-		af_packet atkbd i8042 virtio_pci; do
-			manual_add_modules "${x}"
-		done
-	;;
-	net)
-		copy_modules_dir kernel/drivers/net \
-			appletalk arcnet bonding can hamradio irda pcmcia \
-			tokenring usb wan wimax wireless
-	;;
-	ide)
-		copy_modules_dir kernel/drivers/ide
-	;;
-	mmc)
-		copy_modules_dir kernel/drivers/mmc
-	;;
-	scsi)
-		copy_modules_dir kernel/drivers/scsi
-		for x in mptfc mptsas mptscsih mptspi zfcp; do
-			manual_add_modules "${x}"
-		done
-	;;
-	ata)
-		copy_modules_dir kernel/drivers/ata
-	;;
-	block)
-		copy_modules_dir kernel/drivers/block
-	;;
-	ubi)
-		for x in deflate zlib lzo ubi ubifs; do
-			manual_add_modules "${x}"
-		done
-	;;
-	ieee1394)
-		for x in ohci1394 sbp2; do
-			manual_add_modules "${x}"
-		done
-	;;
-	firewire)
-		for x in firewire-ohci  firewire-sbp2; do
-			manual_add_modules "${x}"
-		done
-	;;
-	i2o)
-		for x in i2o_block; do
-			manual_add_modules "${x}"
-		done
-	;;
-	dasd)
-		for x in dasd_diag_mod dasd_eckd_mod dasd_fba_mod; do
-			manual_add_modules "${x}"
-		done
-	;;
-	usb_storage)
-		copy_modules_dir kernel/drivers/usb/storage
-	;;
-	*)
-		auto_add_modules base
-		auto_add_modules net
-		auto_add_modules ide
-		auto_add_modules scsi
-		auto_add_modules block
-		auto_add_modules ata
-		auto_add_modules i2o
-		auto_add_modules dasd
-		auto_add_modules ieee1394
-		auto_add_modules firewire
-		auto_add_modules mmc
-		auto_add_modules usb_storage
-	;;
-	esac
+	local arg
+	local modules=
+
+	if [ "$#" -eq 0 ] ; then
+		set -- base net ide scsi block ata i2o dasd ieee1394 firewire mmc usb_storage
+	fi
+
+	for arg in "$@" ; do
+		case "$arg" in
+		base)
+			modules="$modules ehci-hcd ohci-hcd uhci-hcd usbhid"
+			modules="$modules xhci xhci-hcd"
+			modules="$modules hid-apple hid-cherry hid-generic"
+			modules="$modules hid-logitech hid-logitech-dj"
+			modules="$modules hid-microsoft hid-sunplus"
+			modules="$modules btrfs ext2 ext3 ext4 ext4dev "
+			modules="$modules isofs jfs nfs reiserfs udf xfs"
+			modules="$modules af_packet atkbd i8042 virtio_pci"
+		;;
+		net)
+			copy_modules_dir kernel/drivers/net \
+				appletalk arcnet bonding can hamradio irda \
+				pcmcia tokenring usb wan wimax wireless
+		;;
+		ide)
+			copy_modules_dir kernel/drivers/ide
+		;;
+		mmc)
+			copy_modules_dir kernel/drivers/mmc
+		;;
+		scsi)
+			copy_modules_dir kernel/drivers/scsi
+			modules="$modules mptfc mptsas mptscsih mptspi zfcp"
+		;;
+		ata)
+			copy_modules_dir kernel/drivers/ata
+		;;
+		block)
+			copy_modules_dir kernel/drivers/block
+		;;
+		ubi)
+			modules="$modules deflate zlib lzo ubi ubifs"
+		;;
+		ieee1394)
+			modules="$modules ohci1394 sbp2"
+		;;
+		firewire)
+			modules="$modules firewire-ohci firewire-sbp2"
+		;;
+		i2o)
+			modules="$modules i2o_block"
+		;;
+		dasd)
+			modules="$modules dasd_diag_mod dasd_eckd_mod dasd_fba_mod"
+		;;
+		usb_storage)
+			copy_modules_dir kernel/drivers/usb/storage
+		;;
+		esac
+	done
+
+	manual_add_modules $modules
 }
 
 # 'depmod' only looks at symbol dependencies; there is no way for
@@ -490,12 +482,15 @@ auto_add_modules()
 # fixed, we need to handle those hidden dependencies.
 hidden_dep_add_modules()
 {
-	for dep in "lib/libcrc32c crc32c"; do
+	local modules=
+	for dep in "lib/libcrc32c crc32c" "fs/ubifs/ubifs deflate zlib lzo"; do
 		set -- $dep
 		if [ -f "${DESTDIR}/lib/modules/${version}/kernel/$1.ko" ]; then
-			manual_add_modules "$2"
+			shift
+			modules="$modules $@"
 		fi
 	done
+	manual_add_modules $modules
 }
 
 # mkinitramfs help message
@@ -531,43 +526,5 @@ cache_run_scripts()
 		[ -f ${initdir}/${crs_x} ] || continue
 		echo "${scriptdir}/${crs_x}" >> ${initdir}/ORDER
 		echo "[ -e /conf/param.conf ] && . /conf/param.conf" >> ${initdir}/ORDER
-	done
-}
-
-# minimal supported kernel version
-check_minkver()
-{
-	local curversion initdir DPKG_ARCH minversion cm_x tmp
-
-	curversion="${1:-}"
-	initdir="${2:-}"
-	if [ -z "${initdir}" ]; then
-		case ${DPKG_ARCH:-} in
-			ia64|hppa)
-				minversion="2.6.15"
-			;;
-			*)
-				minversion="2.6.12"
-			;;
-		esac
-		if dpkg --compare-versions "${curversion}" lt "${minversion}"; then
-			echo "W: kernel ${curversion} too old for initramfs on ${DPKG_ARCH}" >&2
-			echo "W: not generating requested initramfs for kernel ${curversion}" >&2
-			exit 2
-		fi
-		return 0
-	fi
-	set_initlist
-	for cm_x in ${initlist:-}; do
-		# sed:  keep last line starting with MINKVER=,
-		#	remove MINKVER= and trailing space
-		minver=$(sed '/^MINKVER=/!d;$!d;s/^MINKVER=//;s/[[:space:]]*$//' "${initdir}/${cm_x}")
-		if [ -z "${tmp:-}" ]; then
-			continue
-		elif dpkg --compare-versions "${curversion}" lt "${minver}"; then
-			echo "W: ${cm_x} hook script requires at least kernel version ${minver}" >&2
-			echo "W: not generating requested initramfs for kernel ${curversion}" >&2
-			exit 2
-		fi
 	done
 }

@@ -3,3 +3,10 @@ To choose which text editor to use (nano or vim), edit the file
   usr/share/initramfs-tools/bin/runeditor
 and uncomment the line that runs your preferred editor.
 
+By default, Monotype uses a US keyboard layout.  To use your localized keyboard
+layout, set KEYMAP=y in
+  etc/initramfs-tools/initramfs.conf
+
+For either of these changes to take effect, you have to build a new image with
+./build.sh.
+
